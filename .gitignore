@@ -1,1 +1,8 @@
 *.iml
+/bin/
+/.classpath
+/.project
+
+/*.jar
+/*.zip
+*.biglybt
