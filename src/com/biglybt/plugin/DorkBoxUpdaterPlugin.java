@@ -36,7 +36,7 @@ public class DorkBoxUpdaterPlugin
 {
 	private PluginInterface pluginInterface;
 
-	private File fileNewJar;
+	private File fileExistingJar;
 
 	@Override
 	public void unload()
@@ -54,29 +54,33 @@ public class DorkBoxUpdaterPlugin
 			throws PluginException {
 		this.pluginInterface = pluginInterface;
 
-		String pluginDirectoryName = pluginInterface.getPluginDirectoryName();
-		fileNewJar = new File(new File(pluginDirectoryName, "res"),
-				"dorkbox-systemtray.jar");
-		if (!fileNewJar.exists()) {
+		UpdateManager updateManager = pluginInterface.getUpdateManager();
+		
+		fileExistingJar = new File( updateManager.getInstallDir(), "dorkbox-systemtray.jar");
+		
+		if ( !fileExistingJar.exists()){
+			
 			return;
 		}
-
+		
 		pluginInterface.getUIManager().addUIListener(this);
 	}
 
 	private void startUpgrade(UIInstance instance) {
-		if (pluginInterface == null || fileNewJar == null || !fileNewJar.exists()) {
+		if (pluginInterface == null || fileExistingJar == null || !fileExistingJar.exists()) {
 			return;
 		}
 
 		UpdateManager updateManager = pluginInterface.getUpdateManager();
 		try {
 			UpdateInstaller installer = updateManager.createInstaller();
-			String target = new File(installer.getInstallDir(),
-					fileNewJar.getName()).getAbsolutePath();
-			installer.addMoveAction(fileNewJar.getAbsolutePath(), target);
+			
+			String target = new File(fileExistingJar.getParentFile(),fileExistingJar.getName() + ".obsolete" ).getAbsolutePath();
+					
+			installer.addMoveAction(fileExistingJar.getAbsolutePath(), target);
 
 			showScriptAutoUpdateDialog(pluginInterface, instance);
+			
 		} catch (UpdateException e) {
 			e.printStackTrace();
 		}
